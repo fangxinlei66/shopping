@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>欢迎来到本商城</title>
+		<style type="text/css">		
+			.goods{
+				width:1000px;
+				height: 100px;
+				border-bottom: 2px solid black;
+				vertical-align: middle;	
+			}
+			.goods>*{
+				display: inline-block;
+				vertical-align: middle;
+				color: gray;	
+			}
+			
+			.goods .goods-xiaoji{
+				color: red;
+				font-weight: bold;
+			}
+			
+			.goods .goods-description01{
+				width: 200px;
+				margin-left: 20px;
+			}
+			
+			.goods-specification,.price,.goods-number,.xiaoji,.goods-xiaoji,.delete{
+				margin-left: 20px;
+			}
+			
+			.goods-number-buy{
+				width: 50px;	
+					
+			}
+			
+			#zongji{
+				width: 1000px;
+				color:red;
+				text-align: right;
+			}
+			
+		</style>
+		<script type="text/javascript" src="js/jquery-3.3.1.min.js" ></script>
+		<script type="text/javascript">
+			
+			//增加购买商品数量的方法
+			function addGoodsNumber(){
+				$('.goods-number-add').click(function(){
+					//判断库存是否够
+					if (parseInt($(this).prev().val())<=100&&parseInt($(this).prev().val())>0) {		
+						$(this).prev().val(parseInt($(this).prev().val())+1);
+						carculate();
+					} else{
+						$(this).prev().attr('disabled');
+					}	
+				});	
+			}
+				
+			//减少购买商品数量的方法
+			function minusGoodsNumber(){
+					$('.goods-number-minus').click(function(){
+					if ($(this).next().val()>=2) {
+						$(this).next().val($(this).next().val()-1);
+						carculate();
+					} else{
+						$(this).next().attr('disable');
+					}	
+				});		
+			}	
+			//计算总价的方法
+			function carculate(){
+				var sum = 0;				
+				// 计算小计	each循环，
+				$('.goods .goods-price').each( function(i,e){	
+					// .parent() 获取父级jquery 对象
+					// .next() 获取下一个jquery 对象
+					// .find(selector)selector：选择器/选择符
+					var $goodsNumber = $(e).parent().parent().next().find('.goods-number-buy');
+					var $goodsXiaoJi = $(e).parent().parent().next().next().find('span>span');
+					// console.log ( $(e).html() , $goodsNumber.val() , $goodsXiaoJi.html() );
+					var xiaoji = ($(e).html() * $goodsNumber.val()).toFixed(2);
+					$goodsXiaoJi.html ( xiaoji );
+					// 查找多选框
+					// .prev() 查找前一个元素
+					// $(e).parent().prev().prev().prev().prev()
+					// console.log ( $(e).parents('.goods') );
+					var checkbox = $(e).parents('.goods').find('.goods-select');
+					console.log( checkbox.prop('checked') );
+					if ( checkbox.prop('checked') ) {			
+						 sum += +xiaoji;	 
+					}
+					
+				} );
+				$('#zongji>span').html(sum.toFixed(2));
+			}
+			//$(document).ready() 的 简化版本，树型结构加载
+			$(function(){
+				//计算总价的方法
+				carculate();
+				//选择商品的事件
+				$('.goods-select').click( function(){
+					carculate();
+				});
+				//删除商品的事件
+				$('.goods-delete').click( function(){
+					$(this).parent().parent().slideUp(1000 , function(){
+						$(this).remove();
+						carculate();
+					});
+				} );
+					
+				//减少商品的数量事件
+				minusGoodsNumber();
+							
+				//增加商品数量的事件
+				addGoodsNumber();
+									
+				//获取全选框的元素
+				var chkSelectAll=document.getElementById('selects');			
+				//div,获取div里所有多选框的元素
+				var Allgoods=document.getElementById('Allgoods');
+				//通过标签名的类名，获取所有的多选框，返回一个数组类型的checkboxes
+				var checkboxes=Allgoods.getElementsByClassName('goods-select');
+				//全选按钮的绑定事件
+				$('#selects').click(function(){
+					console.log(chkSelectAll.checked);		
+					if (chkSelectAll.checked) {
+					for (var i=0;i<checkboxes.length;i++) {
+						checkboxes[i].checked=chkSelectAll.checked;
+					}
+					carculate();
+				} else{
+					for (var i=0;i<checkboxes.length;i++) {
+						checkboxes[i].checked=chkSelectAll;
+					}
+					$('#zongji>span').html(0.00);
+				}
+				//取消全选时，多选框也全部取消
+				for (var i=0;i<checkboxes.length;i++) {
+					checkboxes[i].checked=chkSelectAll.checked;	
+				}
+				
+				});
+				//给每一项的多选框循环绑定事件
+//				for(var i=0;i<checkboxes.length;i++){
+//					checkboxes[i].onclick=function(){
+//						//判断是否 所有的选项的多选框全部被选中	
+//						//假设全选中
+//						var allSelected=true;
+//						for (var i=0;i<checkboxes.length;i++) {
+//							if(!checkboxes[i].checked){
+//								//有任意一个没被选中，说明假设不成立
+//								allSelected=false;//修改原假设
+//								break;
+//							}	
+//						}	
+//						chkSelectAll.checked=allSelected;
+//					};		
+//				}				
+				//goods-number-buy允许填写，		
+				$('.goods-number-buy').change( function(){					
+					//alert(1);
+					var reg =new RegExp("^[1-9]\d*$")
+					if (reg.test( $(this).val()) ) {
+							//if ($(this).val()) {
+							$(this).val();
+							carculate();
+						//	} 	
+					}else{
+							return false;
+						}		
+									
+				} );
+				
+							
+			});
+	
+		</script>	
+	</head>
+	<body>
+		
+		<!--放置所有商品的div-->
+		<div id="Allgoods" style="width: 1000px;">
+		<!--第一行-->
+		<div class="goods">
+			<input class="goods-select" type="checkbox" checked="checked"/>
+			<img class="goods-image" src="img/5b2b6212N106d8382.jpg" />
+			<div class="goods-description01">
+				<span class="goods-description">OPPO Find X曲面全景屏 波尔多红水</span>
+			</div>
+			<div class="goods-specification">
+				<span>颜色：波尔多红</span><br />
+				<span>尺码：8+128G</span>
+			</div>
+			<div class="price">
+				<span>￥:<span class="goods-price">4000.90</span></span>
+			</div>
+			<div class="goods-number">
+				<input type="button" value="-" class="goods-number-minus"/>
+				<input type="text" class="goods-number-buy" value="4" readonly="true"/>
+				<input type="button" value="+" class="goods-number-add"/>
+			</div>
+			<div class="xiaoji">
+				<span class="goods-xiaoji">￥：<span>0</span></span>
+			</div>
+			<div class="delete">
+				<input class="goods-delete" type="button" value="删除" />
+			</div>
+		</div><br />
+		<!--第二行-->
+		<div class="goods">
+			<input class="goods-select" type="checkbox" />
+			<img class="goods-image" src="img/5b2b6212N106d8382.jpg" />
+			<div class="goods-description01">
+				<span class="goods-description">OPPO Find X曲面全景屏 波尔多红水</span>
+			</div>
+			<div class="goods-specification">
+				<span>颜色：波尔多红</span><br />
+				<span>尺码：8+128G</span>
+			</div>
+			<div class="price">
+				<span>￥:<span class="goods-price">4000</span></span>
+			</div>
+			<div class="goods-number">
+				<input type="button" value="-" class="goods-number-minus"/>
+				<input type="text" class="goods-number-buy" value="3" readonly="true"/>
+				<input type="button" value="+" class="goods-number-add"/>
+			</div>
+			<div class="xiaoji">
+				<span class="goods-xiaoji">￥：<span>0</span></span>
+			</div>
+			<div class="delete">
+				<input class="goods-delete" type="button" value="删除" />
+			</div>
+		</div><br />
+		<!--第三行-->
+		<div class="goods">
+			<input class="goods-select" type="checkbox" />
+			<img class="goods-image" src="img/5b2b6212N106d8382.jpg" />
+			<div class="goods-description01">
+				<span class="goods-description">OPPO Find X曲面全景屏 波尔多红水</span>
+			</div>
+			<div class="goods-specification">
+				<span>颜色：波尔多红</span><br />
+				<span>尺码：8+128G</span>
+			</div>
+			<div class="price">
+				<span>￥:<span class="goods-price">4000</span></span>
+			</div>
+			<div class="goods-number">
+				<input type="button" value="-" class="goods-number-minus"/>
+				<input type="text" class="goods-number-buy" value="2" readonly="true"/>
+				<input type="button" value="+" class="goods-number-add"/>
+			</div>
+			<div class="xiaoji">
+				<span class="goods-xiaoji">￥：<span>0</span></span>
+			</div>
+			<div class="delete">
+				<input class="goods-delete" type="button" value="删除" />
+			</div>
+		</div>	
+		<div id="zongji">
+			<input type="checkbox" id="selects"/>全选&nbsp;
+			总计：<span>0</span>元
+		</div>
+		</div>
+		
+	</body>
+</html>

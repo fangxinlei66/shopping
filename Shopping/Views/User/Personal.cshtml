@@ -1,0 +1,117 @@
+﻿@using Shopping.Models
+@{
+    var addresses = ViewBag.Address as List<Address>;
+    User u = Session["user"] as User;
+    
+}
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<<head>
+    <meta charset="utf-8" />
+    <title>个人中心</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="mobile-agent" content="format=[wml|xhtml|html5];url=http://www.fila.cn/m/cart.html">
+    <link rel="alternate" media="only screen and (max-width:640px)" href="http://www.fila.cn/m/cart.html">
+    <meta name="applicable-device" content="pc">
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta name="keywords" content="斐乐,斐乐官方旗舰店,斐乐旗舰店,FILA官方商城,FILA官网，FILA,斐乐官网,FILA网上商城">
+    <meta name="Description" content="访问斐乐(FILA)官网,了解最新的品牌资讯,成为会员,切身体验尊崇的购物旅程,尽在FILA中国官方网站Fila.cn">
+    <link rel="icon" href="//www.fila.cn/favicon.ico" type="image/x-icon">
+    <script language="javascript">
+	        var u = navigator.userAgent;
+	        if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1
+	                        || u.indexOf('Windows Phone') > -1 || u.indexOf('iPhone') > -1
+	                        || u.indexOf('iPad') > -1) {
+	                        window.location.href ='http://www.fila.cn/m/cart.html';
+
+	        }
+
+    </script>
+
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/cart_list_1.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+    <!--site header common-->
+    <!--[if lt IE 9]>
+    <script src="~/Scripts/html5fix.js" type="text/javascript" charset="utf-8"></script>
+    <![endif]-->
+
+    <style type="text/css">
+        .checkout-container .checkout-maddr .addr-default .add-new-mddr .btn-new-maddr {
+            float: left !important;
+        }
+
+        .cart-container .cart-body .c-ci-title .col-xs-9 .text-warning .glyphicon-warning-sign {
+            color: #e6002d;
+        }
+
+        .form-control input-xsmall {
+            width: 50px;
+        }
+
+        .delete {
+            position: relative;
+            right: -24px;
+            top: -24px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 公共部分 Header -->
+    <header class="fila-header">
+        <div class="logo">
+            <a href="~/Product/List">
+                <img src="~/Images/fila_blue_150.png" alt="">
+            </a>
+        </div>
+        <div class="fila-navbar">
+            <div class="navbar-search">
+                @* 持久化保持数据，将搜索后的名字放回到id=key的搜索框的value中，展示给用户观看 *@
+                <input id="key" class="text" type="text" autocomplete="off" value="@Request.QueryString["keyword"]">
+                @*  '?keyword=不可以使用&keyword否则会提示
+                                        “/”应用程序中的服务器错误。
+                    从客户端(&)中检测到有潜在危险的 Request.Path 值。*@
+                <button class="button" data-action="../Product/List" onclick="$('input[name=keyword]').val($('#key').val()); location.href = $(this).attr('data-action') + '?keyword=' + $('#key').val(); return false;">搜索</button>
+            </div>
+            <ul class="navbar-list">
+                <li><a href="../User/Personal">个人中心</a></li>
+                <!-- 未登录 -->
+                @if (u == null)
+                {
+
+                    <li class="navbar-login">
+                        <a id="login" href="~/User/Login?" target="_blank" title="登入">登入</a>
+                    </li>
+                    <li class="navbar-register">
+                        <a href="~/User/Register" target="_blank" title="注册">注册</a>
+                    </li>
+                }
+                else
+                {
+
+
+                    <li class="navbar-user ">
+                        <a href="/my-orders.html" target="_blank">
+                            您好，
+                            <span>@u.Nickname</span>
+                        </a>
+                    </li>
+                    <li class="navbar-logout ">
+                        <a id="logout" title="退出">退出</a>
+
+                    </li>
+                }
+                <script>
+                        $('#logout').attr('href', '/User/Logout?returnUrl=' + location.pathname);
+                        $('#login').attr('href', '/User/login?returnUrl=' + location.pathname);
+                </script>
+</body>
+</html>

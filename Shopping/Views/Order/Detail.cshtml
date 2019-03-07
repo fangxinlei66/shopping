@@ -1,0 +1,210 @@
+﻿@using Shopping.Models;
+@model Order
+@{
+    User u = Session["user"] as User;
+    Order od = (Order)ViewData["Order"];
+    //Product pt = (Product)ViewData["Product"];
+}
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <title>订单</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="mobile-agent" content="format=[wml|xhtml|html5];url=http://www.fila.cn/m/cart.html">
+    <link rel="alternate" media="only screen and (max-width:640px)" href="http://www.fila.cn/m/cart.html">
+    <meta name="applicable-device" content="pc">
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta name="keywords" content="斐乐,斐乐官方旗舰店,斐乐旗舰店,FILA官方商城,FILA官网，FILA,斐乐官网,FILA网上商城">
+    <meta name="Description" content="访问斐乐(FILA)官网,了解最新的品牌资讯,成为会员,切身体验尊崇的购物旅程,尽在FILA中国官方网站Fila.cn">
+    <link rel="icon" href="//www.fila.cn/favicon.ico" type="image/x-icon">
+    <script language="javascript">
+        var u = navigator.userAgent;
+        if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1
+                        || u.indexOf('Windows Phone') > -1 || u.indexOf('iPhone') > -1
+                        || u.indexOf('iPad') > -1) {
+            window.location.href = 'http://www.fila.cn/m/cart.html';
+
+        }
+
+    </script>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/cart_list_1.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+    <!--site header common-->
+    <!--[if lt IE 9]>
+    <script src="~/Scripts/html5fix.js" type="text/javascript" charset="utf-8"></script>
+    <![endif]-->
+
+    <style type="text/css">
+        .span_1 {
+        font-size:30px;
+        color:orange;
+        }
+        .div_1 {
+            
+            margin:0px auto;
+            
+            height:400px;
+            width:1500px;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;    
+        }
+        .div_2 {
+           
+        margin-left:450px;
+        }
+        .div_3 {
+             height:400px;
+            width:1500px;
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;    
+        
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- 公共部分 Header -->
+    <header class="fila-header">
+        <div class="logo">
+            <a href="~/Product/List">
+                <img src="~/Images/fila_blue_150.png" alt="">
+            </a>
+        </div>
+        <div class="fila-navbar">
+            <div class="navbar-search">
+                @* 持久化保持数据，将搜索后的名字放回到id=key的搜索框的value中，展示给用户观看 *@
+                <input id="key" class="text" type="text" autocomplete="off" value="@Request.QueryString["keyword"]">
+                @*  '?keyword=不可以使用&keyword否则会提示
+                                        “/”应用程序中的服务器错误。
+                    从客户端(&)中检测到有潜在危险的 Request.Path 值。*@
+                <button class="button" data-action="../Product/List" onclick="$('input[name=keyword]').val($('#key').val()); location.href = $(this).attr('data-action') + '?keyword=' + $('#key').val(); return false;">搜索</button>
+            </div>
+            <ul class="navbar-list">
+                <li>
+                    <a href="../User/Personal">个人中心</a>
+                </li>
+                
+                <!-- 未登录 -->
+                @if (u == null)
+                {
+                    <li class="navbar-login">
+                        <a id="login" href="~/User/Login?" target="_blank" title="登入">登入</a>
+                    </li>
+                    <li class="navbar-register">
+                        <a href="~/User/Register" target="_blank" title="注册">注册</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="navbar-user ">
+                        <a href="/my-orders.html" target="_blank">
+                            您好，
+                            <span>@u.Nickname</span>
+                        </a>
+                    </li>
+                    <li class="navbar-logout ">
+                        <a id="logout" title="退出">退出</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </header>
+    <div class="div_1">
+        <span class="span_1">下单成功</span>
+        <div class="div_2">
+            <table style=" border:3px solid red;">
+
+                <tr>
+                    <td> 订单编号</td>
+                    <td>商品名称</td>
+                    <td>商品数量</td>
+                    <td>商品价格</td>
+                    <td>下单时间</td>
+                    <td>订单状态</td>
+                    
+                </tr>
+
+                @foreach (var it in od.OrderDetail)
+            {
+                    <tr>
+
+
+                        <td>@it.OrderId</td>
+                        <td>@it.Product.Name</td>
+                        @*<td>@it.ProductId</td>*@
+                        <td>@it.Number</td>
+                        <td>@od.Price.ToString()</td>
+                        <td>@od.OrderTime</td>
+                        <td>
+                            @switch (od.OrderState)
+                            {
+                                case 0:
+                                    <span>已下单，未付款</span>
+                                    break;
+                                case 1:
+                                    <span>已付款，未发货</span>
+                                    break;
+                                case 2:
+                                    <span>已发货，未签收</span>
+                                    break;
+                                case 3:
+                                    <span>已签收，未评论</span>
+                                    break;
+                                case 4:
+                                    <span>已评论</span>
+                                    break;
+                                case 5:
+                                    <span>已关闭</span>
+                                    break;
+                                case 6:
+                                    <span>退货中</span>
+                                    break;
+                            }
+                        </td>                    
+                    </tr>
+                }
+                
+            </table>
+            <input type="button" id="Edit" value="退货"/>
+            <input type="hidden" id="@od.Id"/>
+            <a href="../Product/List">返回主页</a>
+        </div>
+    </div>
+    <div class="div_3">退货成功！
+        <a href="../Product/List">返回主页</a>
+    </div>
+    <script>
+        $(function () {
+            $('.div_3').hide();
+            $('#Edit').click(function () {
+                var json = {
+                    "orderid": $('#Edit').next().attr('id')
+                }
+                $.post('../Order/Edit', json, function () {
+                    $('.div_1').remove();
+                    $('.div_3').show();
+                })
+               
+            });
+
+            $('#logout').attr('href', '/User/Logout?returnUrl=' + location.pathname);
+            $('#login').attr('href', '/User/login?returnUrl=' + location.pathname);
+
+            $.ajaxSettings.async = false;
+            //提交表单
+            $('a.checkout-btn').click(function () {
+                $('#cartForm').get(0).submit();
+            });
+        })
+      
+    </script>
+</body>
+</html>

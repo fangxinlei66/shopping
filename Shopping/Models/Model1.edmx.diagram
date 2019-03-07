@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="d24e836fa84d4f7282d1ed11e2ec34bc" Name="Diagram1">
+        <EntityTypeShape EntityType="shoppingModel.Address" Width="1.5" PointX="0.75" PointY="12.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.Area" Width="1.5" PointX="1.5" PointY="17.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.Cart" Width="1.5" PointX="5.25" PointY="6.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.Comment" Width="1.5" PointX="5.25" PointY="3" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.Navigators" Width="1.5" PointX="7.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.Order" Width="1.5" PointX="3" PointY="13" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.OrderDetail" Width="1.5" PointX="5.25" PointY="9" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.Product" Width="1.5" PointX="3" PointY="4.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.ProductColor" Width="1.5" PointX="0.75" PointY="6.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.ProductImage" Width="1.5" PointX="5.25" PointY="15.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.ProDuctSize" Width="1.5" PointX="0.75" PointY="3" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.ProductType" Width="1.5" PointX="0.75" PointY="9.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.Urls" Width="1.5" PointX="7.75" PointY="4" IsExpanded="true" />
+        <EntityTypeShape EntityType="shoppingModel.User" Width="1.5" PointX="3" PointY="0.75" IsExpanded="true" />
+        <AssociationConnector Association="shoppingModel.FK__Address__AreaId__164452B1" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Address__UserId__15502E78" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Order__AddressId__2F10007B" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Area__ParentId__1273C1CD" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Cart__ProductId__2C3393D0" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Cart__UserId__2B3F6F97" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Comment__Product__24927208" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Comment__UserId__25869641" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__OrderDeta__Order__31EC6D26" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__OrderDeta__Produ__32E0915F" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Product__Product__1FCDBCEB" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Product__Product__20C1E124" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Product__TypeId__21B6055D" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__ProductIm__Produ__49C3F6B7" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__ProductType__Pid__1CF15040" ManuallyRouted="false" />
+        <AssociationConnector Association="shoppingModel.FK__Order__UserId__49C3F6B7" />
+        <EntityTypeShape EntityType="shoppingModel.Admin" Width="1.5" PointX="9.375" PointY="6.75" />
+        <EntityTypeShape EntityType="shoppingModel.Menu" Width="1.5" PointX="7.375" PointY="6.75" />
+        <AssociationConnector Association="shoppingModel.ChildMenus" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,677 @@
+﻿@using Shopping.Models
+@model List<Cart>
+    @{ 
+        var addresses = ViewBag.Address as List<Address>;
+        User u = Session["user"] as User;
+        double zj = 0;
+    }
+<!DOCTYPE HTML>
+<html lang="zh-CN"> 
+<head>
+    <meta charset="utf-8" />
+    <title>我的购物车</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="mobile-agent" content="format=[wml|xhtml|html5];url=http://www.fila.cn/m/cart.html">
+    <link rel="alternate" media="only screen and (max-width:640px)" href="http://www.fila.cn/m/cart.html">
+    <meta name="applicable-device" content="pc">
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta name="keywords" content="斐乐,斐乐官方旗舰店,斐乐旗舰店,FILA官方商城,FILA官网，FILA,斐乐官网,FILA网上商城">
+    <meta name="Description" content="访问斐乐(FILA)官网,了解最新的品牌资讯,成为会员,切身体验尊崇的购物旅程,尽在FILA中国官方网站Fila.cn">
+    <link rel="icon" href="//www.fila.cn/favicon.ico" type="image/x-icon">
+    <script language="javascript">
+	        var u = navigator.userAgent;
+	        if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1
+	                        || u.indexOf('Windows Phone') > -1 || u.indexOf('iPhone') > -1
+	                        || u.indexOf('iPad') > -1) {
+	                        window.location.href ='http://www.fila.cn/m/cart.html';
+
+	        }
+
+    </script>
+
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/cart_list_1.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+    <!--site header common-->
+    <!--[if lt IE 9]>
+    <script src="~/Scripts/html5fix.js" type="text/javascript" charset="utf-8"></script>
+    <![endif]-->
+    
+    <style type="text/css">
+        .checkout-container .checkout-maddr .addr-default .add-new-mddr .btn-new-maddr {
+            float: left !important;
+        }
+
+        .cart-container .cart-body .c-ci-title .col-xs-9 .text-warning .glyphicon-warning-sign {
+            color: #e6002d;
+        }
+        .form-control input-xsmall {
+        width:50px;
+        }
+
+        .delete {
+        position:relative;
+        right:-24px;
+        top:-24px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 公共部分 Header -->
+    <header class="fila-header">
+        <div class="logo">
+            <a href="~/Product/List">
+                <img src="~/Images/fila_blue_150.png" alt="">
+            </a>
+        </div>
+        <div class="fila-navbar">
+            <div class="navbar-search">
+                @* 持久化保持数据，将搜索后的名字放回到id=key的搜索框的value中，展示给用户观看 *@
+                <input id="key" class="text" type="text" autocomplete="off" value="@Request.QueryString["keyword"]">
+                @*  '?keyword=不可以使用&keyword否则会提示
+                                        “/”应用程序中的服务器错误。
+                    从客户端(&)中检测到有潜在危险的 Request.Path 值。*@
+                <button class="button" data-action="../Product/List" onclick="$('input[name=keyword]').val($('#key').val()); location.href = $(this).attr('data-action') + '?keyword=' + $('#key').val(); return false;">搜索</button>
+            </div>
+            <ul class="navbar-list">
+                <li><a href="../User/Personal">个人中心</a></li>
+                <!-- 未登录 -->
+                @if (u == null)
+                {
+
+                    <li class="navbar-login">
+                        <a id="login" href="~/User/Login?" target="_blank" title="登入">登入</a>
+                    </li>
+                    <li class="navbar-register">
+                        <a href="~/User/Register" target="_blank" title="注册">注册</a>
+                    </li>
+                }
+                else
+                {
+
+
+                    <li class="navbar-user ">
+                        <a href="/my-orders.html" target="_blank">
+                            您好，
+                            <span>@u.Nickname</span>
+                        </a>
+                    </li>
+                    <li class="navbar-logout ">
+                        <a id="logout" title="退出">退出</a>
+
+                    </li>
+                }
+                <script>
+                        $('#logout').attr('href', '/User/Logout?returnUrl=' + location.pathname);
+                        $('#login').attr('href', '/User/login?returnUrl=' + location.pathname);
+                </script>
+
+
+                <li class="navbar-cart dropdown">
+                    <a class="dropdown-toggle" href="~/Cart/List" target="_blank">
+                        @*<i class="icon icon-cart"></i>*@
+
+                        @if (u != null)
+                        {
+                            <span class="cart-count" id="cart-count">
+
+                                @ViewBag.cartCount
+                            </span>
+                        }
+
+
+                    </a>
+                    <!-- <ul class="dropdown-menu mini-cart" style="display:none;">
+                    </ul> -->
+                </li>
+                <li class="navbar-country">
+                    <a href="/regionSelector.html" target="_blank">
+                        <i class="icon icon-country"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="main">
+        <div id="dialog" data-load="load">
+            <div class="ctr">
+                <div class="filaLoading">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        <div class="page-header  cart-title">
+            <h1>
+                购物车
+            </h1>
+        </div>
+        <div class="container main-container">
+            <form id="cartForm" action="~/Order/Add" method="get" class="checkout-container">
+                
+                @*@{ 
+                    var defaultAddressId = -1;
+
+                }
+                @foreach (var address in addresses) {
+                    if (address.IsDefault == true)
+                    {
+                        defaultAddressId = address.Id;
+                    }
+                }
+                <input id="AddressId" type="hidden" name="AddressId" value="@defaultAddressId" />*@
+                
+                    <div data-flowindex=0 class="panel panel-default checkout-maddr ">
+                        <div class="panel-heading clearfix">
+                            <h3 class="panel-title pull-left">收货人信息</h3>
+                        </div>
+                        <div class="address_box">
+                            <ul class="list-group addr-default row">
+                                @{
+                                    var check = "checked";
+                                    var active = "active";
+                                }
+                                @foreach (var address in addresses)
+                                {
+                                    @* 单个收货地址开始 *@
+                                    <li class="address list-group-item clearfix  col-md-3  @if (address.IsDefault == true) { @active; } ">
+                                        <address class="pull-left">
+                                            <p><img data-id="@address.Id" class="delete pull-right" src="~/Images/X.jpg" style="width:20px;height:20px;" /></p>
+                                            <input type="radio" class="address-id hide" name="AddressId" value="@address.Id"
+                                                   @if (address.IsDefault == true) { @check ; }>
+
+                                            <p data-bind="name" class="addr-name">@address.ReceiverName</p>
+                                            <span data-bind="mobile" class="pull-right mobile">@address.Phone</span>
+                                            <p data-bind="area" class="addr-area">
+                                                @address.Area.ParentArea.ParentArea.Name
+                                                @address.Area.ParentArea.Name
+                                                @address.Area.Name
+                                            </p>
+                                            <input type="hidden" class="area0" value="@address.Area.ParentArea.ParentArea.Id" />
+                                            <input type="hidden" class="area1" value="@address.Area.ParentArea.Id" />
+                                            <input type="hidden" class="area2" value="@address.Area.Id" />
+                                            <p data-bind="addr" class="addr-area detail-address">@address.DetailAddress</p>
+                                            &nbsp;
+                                            @if (address.IsDefault == true)
+                                            {
+                                                <span id="defaultAddress" class="label label-default">
+                                                    <img src="~/Images/check_true.png" width="15" height="15">
+                                                    <!--  <input type="checkbox" checked="check" id="flat-checkbox-1"> -->
+                                                    <small>默认地址</small>
+                                                </span>
+                                            }
+
+                                            <div class="btn-group btn-list-edit btn-group-xs pull-right" role="group" aria-label="收货人信息操作">
+                                                <button data-toggle="modal" data-target="#member_addr_edit_modal" data-addrid="60631" type="button" class="btn btn-default btn-edit-maddr">编辑</button>
+                                                <!-- <button data-addrid="60631" type="button" class="btn btn-default btn-delete-maddr">删除</button>  -->
+                                            </div>
+                                        </address>
+                                    </li>
+                                    @* 单个收货地址结束 *@
+                                }
+
+                                <li class="list-group-item add-new-mddr col-md-3">
+                                    <button id="addAddress" data-toggle="modal" data-target="#member_addr_edit_modal" type="button" class="btn  btn-xs pull-right btn-new-maddr">
+                                        <img src="~/images/add-addr.png" alt="">
+                                        <p>添加收货地址</p>
+                                    </button>
+                                </li>
+                            </ul>
+
+                        </div>
+                    </div>
+
+
+
+
+                    @* 提交购物车，添加到订单中去 *@
+
+                    <div class="row cart-box">
+                        <div class="cart-container">
+                            <div class="row cart-header">
+                                <div class="col-xs-1 c-ch-check">
+                                </div>
+                                <div class="col-xs-5 c-ch-title">商品信息</div>
+                                <div class="col-xs-1 c-ch-price">单价</div>
+                                <div class="col-xs-2 c-ch-quantity">数量</div>
+                                <div class="col-xs-1 c-ch-amount">小计</div>
+                                <div class="col-xs-2 c-ch-opt">操作</div>
+                            </div>
+                            <div class="cart-body">
+                                <!--普通购物车商品-->
+                                <div class="cart-normal cart-check-box normal-check-box">
+                                    <!--普通购物车商品-->
+                                   
+                                    
+                                    @foreach (var cart in Model)
+                                    {
+                                        @* 单件商品开始 *@
+                                        <div data-object="goods" id="goods" class="row cart.ProductId  enabled" data-goods="cart.ProductId">
+                                            <div class="col-xs-1 c-ci-check">
+
+                                                @* 商品ID *@
+                                                <input id="cart.ProductId" class="ipt-check normal-check-one" type="checkbox" data-ident="@cart.ProductId" name="ProductId"
+                                                       value="@cart.ProductId" checked="checked">
+
+                                                <label for="ck_ident_goods_@cart.ProductId" class="fa"></label>
+                                            </div>
+                                            <div class="col-xs-5 c-ci-title">
+                                                <div class="row">
+                                                    <div class="col-xs-3">
+                                                        <a href="/Product/Detail/@cart.ProductId" target="_blank">
+                                                            <img class="img-thumbnail" src="~/Images/Product/@cart.Product.ProductImage.FirstOrDefault().BigImage" alt="@cart.Product.Name-@cart.Product.ProductColor.Name/@cart.Product.ProDuctSize.Name">
+                                                        </a>
+                                                    </div>
+                                                    <div class="col-xs-9">
+                                                        <h5>
+                                                            <a href="/fila-F61M918111F.html" target="_blank">@cart.Product.Name</a>
+                                                        </h5>
+                                                        <p class="spec-info">
+                                                            @cart.Product.ProductColor.Name/@cart.Product.ProDuctSize.Name
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-xs-9 col-xs-offset-3">
+                                                        <ul class="list-unstyled promotion-list plist-goods"></ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-1 c-ci-price">
+                                                <small>￥</small>
+                                                <span class="data-g-price" data-bind="">@cart.Product.NewPirce</span>
+                                                <br>
+                                                <del class="market-price ">
+                                                    ￥
+                                                    <small>@cart.Product.OldPirce</small>
+                                                </del>
+                                            </div>
+                                            <div class="col-xs-2 c-ci-quantity">
+                                                <div class="product-quantity input-group input-group-sm" data-minibuy="">
+                                                    <div class="spinner-buttons input-group-btn igb-minus" id="@cart.ProductId"  onclick="reduce(this)">
+                                                        <button type="button" class="btn btn-default"></button>
+                                                    </div>
+
+                                                    @* 商品数量 *@
+                                                    <input type="text" data-ident="goods_@cart.ProductId" class="spinner-input form-control"
+                                                           value="@cart.Number" data-now="103" data-value="@cart.Number" name="Number" id="@cart.Number" >
+                                                    <div class="spinner-buttons input-group-btn igb-plus" id="@cart.ProductId"  onclick="plus(this)"   style="opacity: 1;">
+                                                        <a class="btn btn-default">
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-1 c-ci-amount">
+                                                ￥
+                                                <strong data-bind="amount"><span>@(cart.Product.NewPirce * cart.Number)</span></strong>
+                                            </div>
+                                            @{
+                                                zj = zj + Convert.ToDouble(cart.Product.NewPirce * cart.Number);
+                                            }
+                                            <div class="col-xs-2 c-ci-opt">
+                                                <ul class="list-unstyled">
+                                                    <li>
+                                                        @* 17:35 *@
+                                                        <a href="javascript:;" onclick="dele(@cart.ProductId)" class="btn btn-link btn-xs">删除</a>
+                                                    </li>
+                                                    <!--<li><a href="javascript:;" data-mvtofav=".cart-body input:text[data-ident='goods_40039']"
+                                                class="btn btn-link btn-xs">移到收藏夹</a></li>
+                                            -->
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        @* 单件商品结束 *@
+                                                }
+                                    <div class="row cart-header"></div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row cart-footer">
+                            <div class="col-xs-12 c-cf-amount text-right">
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <span class="goods-amount">
+                                            <em data-bind="goods_count">@Model.Count()</em>件商品
+                                        </span>
+                                    </li>
+                                    <li>
+                                        商品总价：￥
+                                        <span data-bind="new_goods_amount" id="zongJia">@zj</span>
+                                    </li>
+
+                                    <li>
+                                        运费：
+                                        <small> ￥</small>
+                                        <span>0</span>
+                                    </li>
+
+                                    <li class="all-pay">
+                                        订单结算
+                                        <small class="text-danger">￥</small>
+                                        <strong  class="text-danger" data-bind="finally_cart_amount" ><span id="JieSuan">@zj</span></strong>
+                                        <input type="hidden" name="Price" value="@zj" />
+                                        @*<script>
+                                                function Price(Price) {
+                                                    $('input[name=Price]').val();
+                                                    $('#cartForm').submit();
+                                                }
+                                        </script>*@
+                                    </li>
+                                </ul>
+                                <ul class="list-unstyled promotion-list plist-order" style="display:none;">
+
+                                    <li data-ruleid="5">
+                                        <span class="label" style="background-color: #03234c; border-radius: 0;"> 运费</span>&nbsp;
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 c-cf-opt text-right go-order">
+                            <a class="checkout-btn checkout btn-lg">去结算</a>
+                        </div>
+
+                    </div>
+                </form>
+</div>
+    </div>
+    
+    @*<script src="~/Scripts/header_180905.js"></script>*@   
+    @*弹出层开始*@
+     <form class="modal" id="member_addr_edit_modal" action="~/Address/Add" method="post">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">
+                        收货人信息
+                        <span>新增</span>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label for="maddr_name" class="col-sm-2 control-label">
+                                姓名
+                                <em class="text-danger">*</em>
+                            </label>
+                            <div class="col-sm-5">
+                                <input type="hidden" id="AddressId" name="Id"/>
+                                <input type="text" required="true" name="ReceiverName" class="form-control" id="maddr_name" placeholder="收货人姓名">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="maddr_mobile" class="col-sm-2 control-label">
+                                手机
+                                <em class="text-danger">*</em>
+                            </label>
+                            <div class="col-sm-5">
+                                <input type="text" required="true" name="Phone" class="form-control" id="maddr_mobile" placeholder="手机号码">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="maddr_area" class="col-sm-2 control-label">
+                                收货地区
+                                <em class="text-danger">*</em>
+                            </label>
+                            <div class="col-sm-10">
+                                <div class="input-group  region" id="maddr_region">
+                                    <input name="maddr[area]" data-v="" package="mainland" type="hidden" value="" />
+                                    @* 一级地区 *@
+                                    <select onchange="getNext(this); clearThree(this);" data-level-index="0" class="form-control input-xsmall">
+                                        <option value="-1">请选择</option>
+                                        @foreach(var area in (ViewBag.Areas as List<Area>)) {
+                                        <option value="@area.Id">@area.Name</option>
+                                        }
+                                    </select>
+                                   @* 二级地区 *@
+                                <select onchange="getNext(this);" data-level-index="1" class="form-control input-xsmall" style="visibility:hidden"></select>
+
+                                @* 三级地区 *@
+                                <select name="AreaId" data-level-index="2" class="form-control input-xsmall" style="visibility:hidden"></select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="maddr_addr" class="col-sm-2 control-label">
+                                收货地址
+                                <em class="text-danger">*</em>
+                            </label>
+                            <div class="col-sm-10">
+                                <input type="text" required="true" name="DetailAddress" class="form-control" id="maddr_addr" placeholder="街道\门牌号码">
+                            </div>
+                        </div>
+                       
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-group">
+                        <div class="col-sm-5 col-sm-offset-2 text-left">
+                            <label class="control-label">
+                                <input type="checkbox" name="IsDefault" value="true"> 默认收货地址
+                            </label>
+                        </div>
+                        <div class="col-sm-5">
+                            <button type="reset" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button type="submit" class="btn btn-primary">保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </form>
+    @* 弹出层结束 *@
+    <script>
+        $.ajaxSettings.async = false;
+
+        function dele(obj) {
+            var productId = obj
+            
+            var json = {
+                "productId": productId
+            }
+            $.get('../Cart/Delete', json, function (data) {
+                if(data==1){
+                    alert('删除成功');
+                    $('#goods').remove();
+                    window.location.reload();
+                }
+                else{
+                    alert('删除失败，请重试');
+                }
+
+
+            })
+            ////减少商品数量的按钮
+            //var reduce = function (obj) {
+            //    var  i=parseInt($(obj).next().val())
+            //    $(obj).next().val(i - 1);
+            //    // alert($(obj).attr('id'));
+            //    var json = {
+            //        "goodid": $(obj).attr('id'),
+            //        "fun": "1"
+            //    }
+            //    var yuanlaixiaoji=parseFloat( $(obj).parent().parent().next().children().children().html())
+            //    var danjia= parseFloat ($(obj).parent().parent().prev().find('span').html());
+            //    $(obj).parent().parent().next().children().children().html((yuanlaixiaoji - danjia).toFixed(2));
+            //    $('#zongJia').html(parseFloat($('#zongJia').html()) - danjia);
+            //    $('#JieSuan').html(parseFloat($('#JieSuan').html()) - danjia);
+            
+            //    $(obj).prev().attr('id', $(obj).prev().val())
+            //    $.get('../Cart/Add', json, function () { })
+
+        }
+
+        
+
+
+
+
+        function getNext(obj){
+
+            // $(obj)  一级的下拉菜单
+          
+            $.post('/Area/List', { 'AreaId': $(obj).val() }, function (data) {
+                $(obj).next().empty();
+                $(data).each(function (i, e) {
+                    var option = '<option value="' + e.Id + '">' + e.Name + '</option>';
+                    $(obj).next().css('visibility', 'visible').append(option);
+                });
+            });
+        }
+        function clearThree(obj) {          // 清理三级
+            $(obj).next().next().empty().css('visibility', 'hidden');
+        }
+
+        //点击地址，设置为收货地址
+        $('.address').click(function () {
+            $(this).siblings().removeClass('active');
+            $(this).addClass('active');
+            //其他地址中的单选按钮去除checked属性，当前这个地址的单选按钮添加checked属性
+            $('input.address-id').removeAttr('checked');
+            $(this).find('input.address-id').attr('checked', true);
+            $(this).find('input.address-id').trigger('click');
+            //$('#AddressId').val($(this).find('img').attr('data-id'));
+        });
+
+        //删除一个地址
+        $('.delete').click(function () {
+            //window.confirm 是确认框，返回值为true或false
+            if (window.confirm("此为确认框，请单击“确定”或“取消”。") == true) {
+                var $self = $(this);
+                $.post('/Address/Delete', { 'AddressId': $self.attr('data-id') }, function () {
+                    $self.parents('.address').remove();
+                    //刷新整个页面
+                    window.location.reload();
+
+                });
+            } else {
+                //刷新整个页面
+                window.location.reload();
+            }
+        });
+
+        //编辑
+        $('.btn-edit-maddr').click(function () {
+            $('#member_addr_edit_modal').find('.modal-title span').html('修改');//修改弹出层标题
+            var $nickname = $(this).parent().parent().find('.addr-name');
+            //alert(nickname);
+            $('#maddr_name').val($nickname.html());
+            var $phone = $(this).parent().parent().find('.mobile');
+            $('#maddr_mobile').val($phone.html());
+            var $detailaddress = $(this).parent().parent().find('.detail-address');
+            $('#maddr_addr').val($detailaddress.html());
+
+            $('select[data-level-index]').css('visibility', 'visible');
+            $('select[data-level-index=0]').val($(this).parent().parent().find('.area0').val()).change();
+            $('select[data-level-index=1]').val($(this).parent().parent().find('.area1').val()).change();
+            $('select[data-level-index=2]').val($(this).parent().parent().find('.area2').val()).change();
+            if ($(this).parent().parent().find('#defaultAddress').length == 1) {
+                $('input[name=IsDefault]').get(0).checked = true;
+            }
+            else
+            {
+                $('input[name=IsDefault]').get(0).checked = false;
+            }
+            $('#member_addr_edit_modal').find('#AddressId').removeAttr('disabled').val($(this).parent().parent().find('.address-id').val());
+
+            $('#member_addr_edit_modal').attr('action', '/Address/Edit');
+        });
+
+        //添加收货地址
+        addAddress
+        $('#addAddress').click(function () {
+            $('#member_addr_edit_modal').get(0).reset();
+            $('select[data-level-index=1]').empty().css('visibility', 'hidden');
+            $('select[data-level-index=2]').empty().css('visibility', 'hidden');
+            $('#member_addr_edit_modal').attr('action', '/Address/Add');
+
+            $('#member_addr_edit_modal').find('#AddressId').attr('disabled', 'disable');
+
+        });
+
+        //提交表单
+        $('a.checkout-btn').click(function () {
+            $('#cartForm').get(0).submit();
+        });
+
+        $()
+        //去除勾选商品的勾选框时，把后面的数量的文本框 添加disabled属性
+        $('input[name=ProductId]').click(function () {
+            var text = $(this).parent().parent().find('input[name=Number]');
+            if ($(this)[0].checked)
+            {
+                text.removeAttr('disabled');
+            } else
+            {
+                text.attr('disabled', 'disabled');
+            }
+            
+        });
+        //增加商品数量的按钮
+        var plus = function (obj) {
+            var  i=parseInt($(obj).prev().val())
+            $(obj).prev().val(i + 1);
+           // alert($(obj).attr('id'));
+            var json = {
+                "goodid": $(obj).attr('id'),
+                "fun":"0"
+            }
+            var yuanlaixiaoji=parseFloat( $(obj).parent().parent().next().children().children().html())
+            var danjia= parseFloat ($(obj).parent().parent().prev().find('span').html());
+            $(obj).parent().parent().next().children().children().html((yuanlaixiaoji + danjia).toFixed(2));
+            $('#zongJia').html(parseFloat($('#zongJia').html()) + danjia);
+            $('#JieSuan').html(parseFloat($('#JieSuan').html()) + danjia);
+            $(obj).prev().attr('id', $(obj).prev().val())
+            $.get('../Cart/Add', json, function () { })
+
+
+        }
+        //减少商品数量的按钮
+        var reduce = function (obj) {
+            var  i=parseInt($(obj).next().val())
+            if(i==1){
+                $(obj).next().val(1);
+            }
+            else{
+                $(obj).next().val(i - 1);
+                var json = {
+                    "goodid": $(obj).attr('id'),
+                    "fun": "1"
+                }
+                var yuanlaixiaoji=parseFloat( $(obj).parent().parent().next().children().children().html())
+                var danjia= parseFloat ($(obj).parent().parent().prev().find('span').html());
+                $(obj).parent().parent().next().children().children().html((yuanlaixiaoji - danjia).toFixed(2));
+                $('#zongJia').html(parseFloat($('#zongJia').html()) - danjia);
+                $('#JieSuan').html(parseFloat($('#JieSuan').html()) - danjia);
+            
+                $(obj).prev().attr('id', $(obj).prev().val())
+                $.get('../Cart/Add', json, function () { })
+            }
+           // alert($(obj).attr('id'));
+        }
+    </script>
+</body>
+
+
+</html>
+
+
+@* 02：08day05-4 *@

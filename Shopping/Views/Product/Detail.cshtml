@@ -1,0 +1,575 @@
+﻿@using Shopping.Models;
+@model Product
+@*@model Shopping.Models.List<Product>*@
+@{
+
+    //分页
+    //每页多少条
+    var pageSize = Convert.ToInt32(ViewBag.pageSize);
+    //总条数
+    var productCount = Convert.ToInt32(ViewBag.ProductCount);
+    //总页数
+    var allPages = Math.Ceiling(productCount * 1.0 / 3);
+    //当前是第几页
+    var currentPage = Convert.ToInt32(ViewBag.Page);
+    //分页End
+
+
+
+    var currentProductType = ViewBag.CurrentProductType as ProductType;
+
+    var basciRequestString = "/Product/List?a=1";
+    var requestString = "";
+
+    var ProductTypeRequest = "";
+    if (currentProductType != null)
+    {
+        ProductTypeRequest = "&ProductTypeId=" + currentProductType.Id;
+    }
+    requestString = basciRequestString + ProductTypeRequest;
+
+
+    
+        User u = Session["user"] as User;
+
+    
+}
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+<head>
+    
+    <meta charset="utf-8">
+    <title>@Model.Name</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="applicable-device" content="pc">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="keywords" content="斐乐,斐乐官方旗舰店,斐乐旗舰店,FILA官方商城,FILA官网，FILA,斐乐官网,FILA网上商城">
+    <meta name="Description" content="访问斐乐(FILA)官网,了解最新的品牌资讯,成为会员,切身体验尊崇的购物旅程,尽在FILA中国官方网站Fila.cn">
+    <link rel="icon" href="//www.fila.cn/favicon.ico" type="image/x-icon">
+ 
+    <script language="javascript">
+	        var u = navigator.userAgent;
+	        if (u.indexOf('Android') > -1 || u.indexOf('Linux') > -1
+	                        || u.indexOf('Windows Phone') > -1 || u.indexOf('iPhone') > -1
+	                        || u.indexOf('iPad') > -1) {
+	                        window.location.href ='http://www.fila.cn/m/fila-K12B911290.html';
+
+	        }
+
+    </script>
+
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!--site header common-->
+    <!--[if lt IE 9]>
+    <script src="/public/javascripts/html5fix.js?ve726" type="text/javascript" charset="utf-8" ></script>
+    <![endif]-->
+    <script src="~/Scripts/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+
+
+    <!-- 详情页样式 -->
+    <link rel="stylesheet" href="~/Content/ProductDetail_1.css" >
+    <script src="~/Scripts/ProductDeatile_1.js"></script>
+    <link rel="stylesheet" href="~/Content/ProductDetail_2.css">
+<script>
+    //这是立即购买的Script jquery
+    $(function () {
+        //立刻购买
+        $('#buyNow').click(function () {
+
+        });
+        $('#addToCart').click(function () {
+            //1）location.pathname.lastIndexOf('/')找到最后一位‘/’
+            //2）location.pathname.substr()获取从最后一个'/'后面的部分
+            productId = location.pathname.substr(location.pathname.lastIndexOf('/') + 1);
+            location.href = '/Cart/Add?ProductId=' + productId;
+            
+        });
+
+
+    });
+
+    function productType(productTypeId) {
+        location.href = '../List?ProductTypeId=' + productTypeId;
+
+
+
+        
+
+    }
+</script>
+</head>
+
+
+<body>
+    
+
+    @* 当请求中的参数较多的时候，拼接请求内容的时候是比较繁琐，容易出错的地方
+        持久化保存请求中的参数（旧的参数，除非手动删除，否则应该还在）
+        1）把旧的参数 存入 Session  ，优势比较方便， 劣势 Session有过期时间，会过期
+        2）把参数存放在页面中一个隐藏的表单中，发送请求就是通过提交表单来发送的*@
+    @* 隐藏表单 *@
+    @*进行 搜索，筛选，排序，分页，提供这些数据的表单*@
+
+    <form id="formProductList" action="~/Product/List" method="get" style="display:none">
+        <input type="hidden" name="ProductTypeId" value="@Request.QueryString["ProductTypeId"]" />
+        <input type="hidden" name="Order" value="@Request.QueryString["Order"]" />
+        <input type="hidden" name="Page" value="1" />
+        <input type="hidden" name="keyword" value="@Request.QueryString["keyword"]" />
+    </form>
+
+    
+
+    <!-- 公共部分 Header -->
+    <header class="fila-header">
+        <div class="logo">
+            <a href="~/Product/List">
+                <img src="~/Images/fila_blue_150.png" alt="">
+            </a>
+        </div>
+        <div class="fila-navbar">
+            <div class="navbar-search">
+                @* 持久化保持数据，将搜索后的名字放回到id=key的搜索框的value中，展示给用户观看 *@
+                <input id="key" class="text" type="text" autocomplete="off" value="@Request.QueryString["keyword"]">
+                @*  '?keyword=不可以使用&keyword否则会提示
+                                        “/”应用程序中的服务器错误。
+                    从客户端(&)中检测到有潜在危险的 Request.Path 值。*@
+                <button class="button" data-action="../List" onclick="$('input[name=keyword]').val($('#key').val()); location.href = $(this).attr('data-action') + '?keyword=' + $('#key').val(); return false;">搜索</button>
+            </div>
+            <ul class="navbar-list">
+                <a href="../User/Personal">个人中心</a>
+                <!-- 未登录 -->
+                @if (u == null)
+                {
+
+                    <li class="navbar-login">
+                        <a id="login" href="~/User/Login" target="_blank" title="登入">登入</a>
+                    </li>
+                    <li class="navbar-register">
+                        <a href="~/User/Register" target="_blank" title="注册">注册</a>
+                    </li>
+                }
+                else
+                {
+
+
+                    <li class="navbar-user ">
+                        <a href="/my-orders.html" target="_blank">
+                            您好，
+                            <span>@u.Nickname</span>
+                        </a>
+                    </li>
+                    <li class="navbar-logout ">
+
+                        <a id="logout"  title="退出">退出</a>
+                       
+                    </li>
+                }
+                <script>
+                            $('#logout').attr('href', '/User/Logout?returnUrl=' + location.pathname);
+                            $('#login').attr('href', '/User/login?returnUrl=' + location.pathname);
+                </script>
+
+                <li class="navbar-cart dropdown">
+                    <a class="dropdown-toggle" href="~/Cart/List" target="_blank">
+                        <i class="icon icon-cart"></i>
+                        
+                        @if (u != null)
+                        {
+                            <span class="cart-count" id="cart-count">
+                                
+                                @ViewBag.cartCount
+                            </span>
+                        }
+                       
+                            
+                    </a>
+                    <!-- <ul class="dropdown-menu mini-cart" style="display:none;">
+                    </ul> -->
+                </li>
+                <li class="navbar-country">
+                    <a href="/regionSelector.html" target="_blank">
+                        <i class="icon icon-country"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+    <div class="main clearfix">
+        <!-- 部分页面公共部分 左侧Nav -->
+        <style type="text/css">
+            .list-group-item.color-activity h4, .list-group-item.color-activity h4 > a {
+                color: #CF5A4A;
+            }
+
+            .color-activity .cat2-li, .color-activity .cat2-li a {
+                color: #CF5A4A;
+            }
+        </style>
+        <div class="fila-nav">
+            <div class="nav-content">
+                <div class="sidebar-cate">
+                    @{
+                        var productTypes = ViewBag.ProductTypes as IEnumerable<ProductType>;
+
+                    }
+                    @*一级菜单开始*@
+                    @foreach (var pt in productTypes)
+                    {
+                        string active = string.Empty;
+                        //短路运算
+                        if (currentProductType != null && pt.Id == currentProductType.ProductType2.Id)
+                        {
+                            active = " active";
+                        }
+                        else
+                        {
+                            active = "";
+                        }
+
+                        
+                        <ul class="list-group-item category-root @active">
+                            <li class="list-group-item has-children dis-active">
+                                <h4><a href="javascript:;">@pt.Name</a></h4>
+                                @*二级菜单开始*@
+                                @foreach (var p in pt.ProductType1)
+                                {
+                                    string activeTwo = "active-two";
+                                    if (!(currentProductType != null && p.Id == currentProductType.Id))
+                                    {
+                                        activeTwo = "";
+                                    }
+                                    else
+                                    {
+
+                                    }
+                                    <ul class="cat2-list @activeTwo">
+                                        <li class="cat2-li">
+                                            <a href="javascript:productType(@p.Id);">@p.Name</a>
+                                        </li>
+                                    </ul>
+                                }
+                                @*二级菜单结束*@
+                            </li>
+                        </ul>
+                    }
+                    @*一级菜单结束*@
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="~/Scripts/vue.min.js"></script>
+        <script type="text/javascript">
+            //var menuList;
+            //$.ajax({
+            //    type: "POST",
+            //    url: "/tp5.php?s=shopping/index/getNavData",
+            //    dataType: "json",
+            //    async: false,
+            //    success: function (res) {
+            //        menuList = res;
+            //    }
+            //});
+
+            //var goodsList = menuList.list;
+            //var serveList = menuList.serveList;
+            //var vm = new Vue({
+            //    el: '.fila-nav',
+            //    data: {
+            //        goodsList: goodsList,
+            //        serveList: serveList
+            //    }
+            //});
+            $(function () {
+                /* 侧边栏菜单toggle */
+                $(".list-group-item.has-children>h4").click(function () {
+                    var _parent = $(this).parents(".list-group-item.has-children");
+                    if (_parent.hasClass("active")) {
+                        _parent.removeClass("active");
+                        return false;
+                    }
+                    _parent.addClass("active").siblings(".active").removeClass("active");
+                });
+            });
+            function isShow() {                  //默认展开
+                var _isShow = $(".isShow")
+                console.log(_isShow)
+                _isShow.addClass("active")
+            }
+        </script>		
+        
+        <!-- 详情页内容 -->
+
+        @{ 
+            List<ProductImage> imageList =  Model.ProductImage.ToList();
+        }
+        @* 你的链接没有传入非空的id，可以直接在地址栏输入合法的链接 *@
+        <div class="fila-content clearfix">
+            <div class="pro-detail clearfix">
+                <div class="detail-line">
+                    <div class="detail-img" data-index="1"><img data-original="~/Images/Product/@imageList[0].BigImage" alt="" src="~/Images/Product/@imageList[0].BigImage" style="display: inline;"></div>
+                    <div class="detail-img" data-index="2"><img data-original="~/Images/Product/@imageList[1].BigImage" alt="" src="~/Images/Product/@imageList[1].BigImage" style="display: inline;"></div>
+                    <div class="colorImg-change-wrp">
+                        <h4>其他颜色/点击查看</h4>
+                        <div class="color-thumbs"><div class="color-thumb-item active" data-color="满印" >
+                            <img src="~/Images/Product/@imageList[0].BigImage" alt="">
+                            <p>@Model.ProductColor.Name</p>
+                            </div>
+                        </div>
+                        <div class="detail-txt-1"></div>
+                    </div>
+                </div>
+                <div class="detail-line" style="display: flex;display: -webkit-flex;align-items: center;">
+                    <div class="detail-img" data-index="3"><img data-original="~/Images/Product/@imageList[2].BigImage" alt="" src="~/Images/Product/@imageList[2].BigImage" style="display: inline;"></div>
+                    <div class="detail-img" data-index="4"><img data-original="~/Images/Product/@imageList[3].BigImage" alt="" src="~/Images/Product/@imageList[3].BigImage" style="display: inline;"></div>
+                </div>
+                <div class="detail-line">
+                    <div class="detail-txt-2">
+                        <p> 棉弹力空气层，手感顺滑，造型挺括有型；<br>满印的设计元素，极具街头时尚气息。</p>
+                    </div>
+                    <div class="detail-desc">
+                        <a href="javascript:;" class="detail-desc-open" onclick="$('.detail-txt-3').show();return;">面料说明</a>
+                        <div class="detail-txt-3">
+                            <h3>
+                                面料说明
+                                <a href="javascript:;" class="detail-desc-close" onclick="$('.detail-txt-3').hide();return;">+</a>
+                            </h3>
+                            <p>94%棉+6%氨纶</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-line">
+                    <div class="detail-img" data-index="5"><img data-original="~/Images/Product/@imageList[4].BigImage" alt="" src="~/Images/Product/@imageList[4].BigImage" style="display: inline;"></div>
+                    <div class="detail-img" data-index="6"><img data-original="~/Images/Product/@imageList[5].BigImage" alt="" src="~/Images/Product/@imageList[5].BigImage" style="display: inline;"></div>
+                    <div class="detail-img" data-index="7"><img data-original="~/Images/Product/@imageList[6].BigImage" alt="" src="~/Images/Product/@imageList[6].BigImage" style="display: inline;"></div>
+                </div>
+                <div class="detail-size">
+                    @if (Model.ProductType.ProductType2.Name == "男士")
+                    {
+                        <table style="width: 399px;" width="583" cellspacing="0" cellpadding="0">
+                            <colgroup><col style=";width:120px" width="120"><col style=";width:76px" width="76" span="2"><col style=";width:116px" width="116"><col style=";width:67px" width="66"><col style=";width:129px" width="129"></colgroup><tbody><tr style="height:19px" class="firstRow" height="19"><td style="" width="120" height="19">尺码</td><td style="" width="76">胸围</td><td style="" width="76">肩宽</td><td style="" width="116">袖长</td><td style="" width="67">衣长</td><td style="" width="129">适合身高</td></tr><tr style="height:19px" height="19"><td style="" height="19">165/88A/S</td><td>98</td><td>41</td><td>60</td><td>64</td><td>165</td></tr><tr style="height:19px" height="19"><td style="" height="19">170/92A/M</td><td>102</td><td>43</td><td>62</td><td>66</td><td>170</td></tr><tr style="height:19px" height="19"><td style="" height="19">175/96A/L</td><td>106</td><td>44</td><td>63</td><td>68</td><td>175</td></tr><tr style="height:19px" height="19"><td style="" height="19">180/100A/XL</td><td>110</td><td>46</td><td>64</td><td>70</td><td>180</td></tr><tr style="height:19px" height="19"><td style="" height="19">185/104A/XXL</td><td>115</td><td>47</td><td>65</td><td>72</td><td>185</td></tr><tr style="height:19px" height="19"><td style="" height="19">190/108A/XXXL</td><td>120</td><td>49</td><td>67</td><td>74</td><td>190</td></tr></tbody>
+                    </table>
+                    }
+                    else if (Model.ProductType.ProductType2.Name == "女士")
+                    {
+                        <table width="399" cellspacing="0" cellpadding="0"><colgroup><col style=";width:120px" width="120"><col style=";width:76px" width="76" span="2"><col style=";width:116px" width="116"><col style=";width:93px" width="93"><col style=";width:129px" width="129"></colgroup><tbody><tr style="height:19px" class="firstRow" height="19"><td style="" width="120" height="19">尺码</td><td style="" width="76">胸围</td><td style="" width="76">肩宽</td><td style="" width="116">袖长</td><td style="" width="93">衣长</td><td style="" width="129">适合身高</td></tr><tr style="height:19px" height="19"><td style="" height="19">155/76A/XS</td><td>86</td><td>34</td><td>56</td><td>54</td><td>155</td></tr><tr style="height:19px" height="19"><td style="" height="19">160/80A/S</td><td>90</td><td>36</td><td>58</td><td>56</td><td>160</td></tr><tr style="height:19px" height="19"><td style="" height="19">165/84A/M</td><td>94</td><td>37</td><td>59</td><td>58</td><td>165</td></tr><tr style="height:19px" height="19"><td style="" height="19">170/88A/L</td><td>98</td><td>38</td><td>60</td><td>60</td><td>170</td></tr><tr style="height:19px" height="19"><td style="" height="19">175/92A/XL</td><td>102</td><td>40</td><td>62</td><td>62</td><td>175</td></tr><tr style="height:19px" height="19"><td style="" height="19">180/96A/XXL</td><td>106</td><td>41</td><td>63</td><td>64</td><td>180</td></tr></tbody></table>
+                    }
+                    else
+                    {
+                        <table style="width: 399px;" width="476" cellspacing="0" cellpadding="0">
+                            <colgroup><col style="width:72px" width="72"><col style=";width:104px" width="104"><col style="width:72px" width="72"><col style=";width:84px" width="84"><col style="width:72px" width="72" span="2"></colgroup>
+                            <tbody>
+                                <tr style="height:18px" class="firstRow" height="18"><td style="" width="72" height="18">尺码</td><td style="" width="104">胸围（半围）</td><td style="" width="72">肩宽</td><td style="" width="84">袖长</td><td style="" width="72">衣长</td><td style="" width="72">适用身高</td></tr>
+                                <tr style="height:18px" height="18"><td style="" height="18">120</td><td>36</td><td>29.4</td><td>42.5</td><td>46.5</td><td>115-125cm</td></tr>
+                                <tr style="height:18px" height="18"><td style="" height="18">130</td><td>38</td><td>31</td><td>46</td><td>50</td><td>126-135cm</td></tr>
+                                <tr style="height:18px" height="18"><td style="" height="18">140</td><td>40.5</td><td>33</td><td>50</td><td>54</td><td>136-145cm</td></tr>
+                                <tr style="height:18px" height="18"><td style="" height="18">150</td><td>43</td><td>35</td><td>54</td><td>58</td><td>146-155cm</td></tr>
+                                <tr style="height:18px" height="18"><td style="" height="18">160</td><td>45.5</td><td>37</td><td>57.5</td><td>62</td><td>156-165cm</td></tr>
+                                <tr style="height:18px" height="18"><td style="" height="18">165</td><td>47.5</td><td>38.8</td><td>59.5</td><td>64</td><td>166-170cm</td></tr>
+                                <tr style="height:18px" height="18"><td style="" height="18">170</td><td>49.5</td><td>40.6</td><td>61.5</td><td>66</td><td>171-175cm</td></tr>
+                            </tbody>
+                        </table>
+                    }
+                    <p><br></p>
+                </div>
+                <div class="detail-line" style="text-align:center;">
+                    <div class="detail-img" data-index="8">
+                        @if (imageList.Count >7)
+                        {
+                        <img data-original="~/Images/Product/@imageList[7].BigImage" alt="" src="~/Images/Product/@imageList[7].BigImage" style="display: inline;">
+                        }
+                    </div>
+                    <div class="detail-img" data-index="9">
+                    @if (imageList.Count > 8)
+                    {
+                        <img data-original="~/Images/Product/@imageList[7].BigImage" alt="" src="~/Images/Product/@imageList[8].BigImage" style="display: inline;">
+                    }
+                </div>
+                <div class="detail-line" style="text-align:center;">
+                    <div class="detail-img" data-index="10">
+                    @if (imageList.Count > 9)
+                    {
+                    <img data-original="~/Images/Product/@imageList[9].BigImage" alt="" src="~/Images/Product/@imageList[9].BigImage" style="display: inline;">
+                    }
+                    </div>
+
+
+                    <div class="detail-img" data-index="11">
+                    @if (imageList.Count > 10)
+                    {
+                    <img data-original="~/Images/Product/@imageList[10].BigImage" alt="" src="~/Images/Product/@imageList[10].BigImage" style="display: inline;">
+                    }
+                    </div>
+                </div>
+                <div class="detail-line">
+                    <div class="price-desc">
+                        <p>页面显示的被划去价格可能是商品的吊牌价零售价或曾展示过的销售价等</p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="pro-purchase-wrp">
+                <div class="pro-purchase">
+                    <div class="pro-name mb20">@Model.Name</div>
+                    <div class="pro-favourite mb20">
+
+                    </div>
+                    <div class="pro-price mb20">
+                        @*String.Format("{0:0.00}",Model.NewPirce
+                            
+                            格式化字符串*@
+                        <p class="buyprice">￥@String.Format("{0:0.00}",Model.NewPirce)</p>
+                        <p class="original-price mtkprice">
+                            吊牌价
+                            <span>￥@String.Format("{0:0.00}", Model.OldPirce)</span>
+                        </p>
+                    </div>
+                   
+                    <div class="product-spec-options mb20" id="page-spec">
+                        <div class="product-spec-color product-spec-item">
+                            <h4>颜色:</h4>
+                            <ul class="ps-opt-sel main-pos"><li  color_name="@Model.ProductColor.Name" data-li="[0,0]" class="active"><span>@Model.ProductColor.Name</span></li></ul>
+                        </div>
+                        <div class="product-spec-size product-spec-item">
+                            <h4>尺码:</h4>
+                            <ul class="ps-opt-sel main-pos">
+                                <li> <span>@Model.ProDuctSize.Name</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                  
+                    <div id="by2" class="check-button ">
+                        <input type="hidden" name="goods_id" id="goods_id" value="4547">
+                        <input type="hidden" name="product_id" id="product_id">
+                        <input id="buyNow" type="button" class="btn btn-success btn-lg btn-buy go-buy check-login" value="立刻购买">
+                        <span onclick="jiaru(this)"><input id="addToCart" type="button" class="btn btn-danger btn-lg btn-buy go-cart" value="加入购物车"></span>
+                    </div>
+                    <div id="by3" class="no-goods-outer hide">
+                        <div class="alert alert-warning no-goods">
+                            <span>此色码已售完</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+
+
+    
+    </div>
+    <script src="~/Scripts/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+    <!--[if lt IE 9]><script src="~/Scripts/respond.min.js"></script><![endif]-->
+    <script src="~/Scripts/jquery.cookie.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/jquery.icheck.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/Scripts/jquery.lazyload.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        var jiaru = function () {
+            var a = parseInt($('#cart-count').html());
+            $('#cart-count').html(a + 1);
+            alert("添加成功");
+        }
+        /***列表页 js***/
+        //function pageClick(id) {
+        //	$("input[name=p]").val(id);
+        //	$('#page').submit(); return false;
+        //}
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return decodeURIComponent(r[2]); return null;
+        }
+        $(function () {
+            //分页keyword
+            if (getQueryString('keyword') != null && getQueryString('keyword') != undefined && getQueryString('keyword') != '') {
+                if ($("#page input[name=keyword]").length <= 0) {
+                    $("#page").append('<input type="hidden" name="keyword" value="">');
+                }
+                $("#page input[name=keyword]").val(getQueryString('keyword'))
+            }
+
+            //相册切换
+            var enter_timer = 0;
+            $('.pic-sm-fila a').on('mouseenter', function (e, tout) {
+                var oli = $(this).closest('li'), lg_img = $(this).closest('.list-row-wrap').find('.pic-lg-fila'), middle_src = $(this).attr('data-middlesrc'), big_src = $(this).prop('data-href');
+                if (!middle_src) return;
+                clearTimeout(enter_timer);
+                enter_timer = setTimeout(function () {
+                    lg_img.find('img').prop('src', middle_src);
+                    $('.pic-sm-fila ul li').removeClass('current');
+                    oli.addClass('current');
+                }, tout || 300);
+            });
+            $('.pic-sm-fila a').on('click', function (e) {
+                clearTimeout(enter_timer);
+                $(this).trigger('mouseenter', [1]);
+            });
+
+            //懒加载
+            $('body').find('img[data-original]').lazyload({
+                'effect': "fadeIn",
+                'threshold': 500,
+
+                //注意JS中的~符号不解析只能用../
+                'placeholder': '../Images/F-logo-750.jpg?v5e07'
+            });
+
+            //goods hover
+            $('.goods-item').hover(function () {
+                var _this = $(this);
+                var s_pic = _this.find('.pic-sm-fila').find('ul li').length;
+                if (s_pic) {
+                    _this.find('.pic-sm-fila').show();
+                }
+
+                _this.find(".caption img").each(function () {
+                    if ($(this).attr("src").length <= 1) {
+                        $(this).attr("src", $(this).attr("data-original"));
+                    }
+                });
+            }, function () {
+                var _this = $(this);
+                _this.find('.pic-sm-fila').hide();
+            });
+
+            $(".list-wrap .list-container .goods-list .goods-item").hover(function () {
+                $(this).addClass("active");
+                for (var i = 0; i < $(this).find("img[data-original]").length; i++) {
+                    var thisimg = $(this).find("img[data-original]").eq(i);
+                    thisimg.attr("src", thisimg.attr("data-original"));
+                    thisimg.css("display", "block");
+                }
+            }, function () {
+                $(this).removeClass("active");
+            });
+
+            $('.form .button').attr('data-action', '/list/?');
+
+            //浏览方式切换  并且cookie记录
+            $(".change-pages>a").click(function () {
+                if ($(this).hasClass("active")) {
+                    return false;
+                }
+                if ($(this).attr("data-num") == "2") {
+                    $(".goods-list").addClass("line_two");
+                    $.cookie('change_pages', $(this).attr("data-num"), { expires: 7 });
+                } else if ($(this).attr("data-num") == "4") {
+                    $(".goods-list").removeClass("line_two");
+                    $.cookie('change_pages', $(this).attr("data-num"), { expires: 7 });
+                } else {
+                    return false;
+                }
+                $(".change-pages>a.active").removeClass("active");
+                $(this).addClass("active");
+            });
+            if ($.cookie('change_pages')) {
+                $(".change-pages>a[data-num=" + $.cookie('change_pages') + "]").click();
+            }
+
+        })
+
+    </script>
+</body>
+</html>
